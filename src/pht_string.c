@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-present The PHP Group                             |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,23 +16,42 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHT_GENERAL_H
-#define PHT_GENERAL_H
+#include <stdlib.h>
+#include <string.h>
 
-#define PHT_STRL(s) (s).len
-#define PHT_STRV(s) (s).val
-#define PHT_STRL_P(s) PHT_STRL(*(s))
-#define PHT_STRV_P(s) PHT_STRV(*(s))
+#include "src/pht_string.h"
 
-typedef struct _pht_string_t {
-    int len;
-    char *val;
-} pht_string_t;
+void pht_str_set_len(pht_string_t *pstr, int len)
+{
+    PHT_STRL_P(pstr) = len;
+    PHT_STRV_P(pstr) = malloc(len + 1);
+    PHT_STRV_P(pstr)[len] = '\0';
+}
 
-void pht_str_set_len(pht_string_t *pstr, int len);
-pht_string_t *pht_str_new(char *s, int len);
-void pht_str_update(pht_string_t *str, char *s, int len);
-int pht_str_eq(pht_string_t *phtstr1, pht_string_t *phtstr2);
-void pht_str_free(pht_string_t *str);
+pht_string_t *pht_str_new(char *s, int len)
+{
+    pht_string_t *pstr = malloc(sizeof(pht_string_t));
 
-#endif
+    pht_str_set_len(pstr, len);
+    memcpy(PHT_STRV_P(pstr), s, len);
+
+    return pstr;
+}
+
+void pht_str_update(pht_string_t *str, char *s, int len)
+{
+    PHT_STRL_P(str) = len;
+    PHT_STRV_P(str) = malloc(len + 1);
+    memcpy(PHT_STRV_P(str), s, len);
+    PHT_STRV_P(str)[len] = '\0';
+}
+
+int pht_str_eq(pht_string_t *phtstr1, pht_string_t *phtstr2)
+{
+    return PHT_STRL_P(phtstr1) == PHT_STRL_P(phtstr2) && !strncmp(PHT_STRV_P(phtstr1), PHT_STRV_P(phtstr2), PHT_STRL_P(phtstr2));
+}
+
+void pht_str_free(pht_string_t *str)
+{
+    free(PHT_STRV_P(str));
+}

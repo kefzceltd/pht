@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-present The PHP Group                             |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,14 +27,6 @@ extern zend_module_entry pht_module_entry;
 
 #define PHP_PHT_VERSION "0.0.1"
 
-#ifdef PHP_WIN32
-#  define PHP_PHT_API __declspec(dllexport)
-#elif defined(__GNUC__) && __GNUC__ >= 4
-#  define PHP_PHT_API __attribute__ ((visibility("default")))
-#else
-#  define PHP_PHT_API
-#endif
-
 #ifndef ZTS
 #  error "ZTS is required"
 #endif
@@ -50,6 +42,19 @@ ZEND_BEGIN_MODULE_GLOBALS(pht)
 ZEND_END_MODULE_GLOBALS(pht)
 
 ZEND_EXTERN_MODULE_GLOBALS(pht)
+
+typedef struct _common_strings_t {
+    zend_string *__construct;
+    zend_string *run;
+    zend_string *_THREAD;
+    zend_string *value;
+    zend_string *Queue;
+    zend_string *HashTable;
+    zend_string *Vector;
+    zend_string *AtomicInteger;
+} common_strings_t;
+
+extern common_strings_t common_strings;
 
 #define PHT_ZG(v) ZEND_MODULE_GLOBALS_ACCESSOR(pht, v)
 

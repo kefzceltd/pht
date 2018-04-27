@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-present The PHP Group                             |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -89,11 +89,11 @@ HashTable *aio_get_properties(zval *zobj)
     pthread_mutex_unlock(&aio->aioi->lock);
 
     if (obj->properties) {
-        zend_hash_str_update(obj->properties, "value", sizeof("value") - 1, &value);
+        zend_hash_update(obj->properties, common_strings.value, &value);
     } else {
         ALLOC_HASHTABLE(obj->properties);
         zend_hash_init(obj->properties, 1, NULL, ZVAL_PTR_DTOR, 0);
-        zend_hash_str_add(obj->properties, "value", sizeof("value") - 1, &value);
+        zend_hash_add(obj->properties, common_strings.value, &value);
     }
 
     return obj->properties;

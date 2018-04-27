@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-present The PHP Group                             |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -139,7 +139,7 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 name_len = spprintf(&name, 0, "Closure@%p", zend_get_closure_method_def(value));
 
                 if (!zend_hash_str_update_ptr(EG(function_table), name, name_len, closure)) {
-                    printf("FAILED!\n");
+                    zend_throw_exception(zend_ce_exception, "Failed to deserialise the closure", 0);
                 }
 
                 efree(name);
@@ -147,8 +147,7 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
             break;
         case PHT_QUEUE:
             {
-                zend_string *ce_name = zend_string_init("pht\\Queue", sizeof("pht\\Queue") - 1, 0);
-                zend_class_entry *ce = zend_lookup_class(ce_name);
+                zend_class_entry *ce = zend_lookup_class(common_strings.Queue);
                 zval zobj;
 
                 PHT_ZG(skip_qoi_creation) = 1;
@@ -169,14 +168,12 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 ++new_qo->qoi->refcount;
                 pthread_mutex_unlock(&new_qo->qoi->lock);
 
-                zend_string_free(ce_name);
                 ZVAL_OBJ(value, Z_OBJ(zobj));
             }
             break;
         case PHT_HASH_TABLE:
             {
-                zend_string *ce_name = zend_string_init("pht\\HashTable", sizeof("pht\\HashTable") - 1, 0);
-                zend_class_entry *ce = zend_lookup_class(ce_name);
+                zend_class_entry *ce = zend_lookup_class(common_strings.HashTable);
                 zval zobj;
 
                 PHT_ZG(skip_htoi_creation) = 1;
@@ -197,14 +194,12 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 ++new_hto->htoi->refcount;
                 pthread_mutex_unlock(&new_hto->htoi->lock);
 
-                zend_string_free(ce_name);
                 ZVAL_OBJ(value, Z_OBJ(zobj));
             }
             break;
         case PHT_VECTOR:
             {
-                zend_string *ce_name = zend_string_init("pht\\Vector", sizeof("pht\\Vector") - 1, 0);
-                zend_class_entry *ce = zend_lookup_class(ce_name);
+                zend_class_entry *ce = zend_lookup_class(common_strings.Vector);
                 zval zobj;
 
                 PHT_ZG(skip_voi_creation) = 1;
@@ -225,14 +220,12 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 ++new_vo->voi->refcount;
                 pthread_mutex_unlock(&new_vo->voi->lock);
 
-                zend_string_free(ce_name);
                 ZVAL_OBJ(value, Z_OBJ(zobj));
             }
             break;
         case PHT_ATOMIC_INTEGER:
             {
-                zend_string *ce_name = zend_string_init("pht\\AtomicInteger", sizeof("pht\\AtomicInteger") - 1, 0);
-                zend_class_entry *ce = zend_lookup_class(ce_name);
+                zend_class_entry *ce = zend_lookup_class(common_strings.AtomicInteger);
                 zval zobj;
 
                 PHT_ZG(skip_aioi_creation) = 1;
@@ -253,7 +246,6 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 ++new_aio->aioi->refcount;
                 pthread_mutex_unlock(&new_aio->aioi->lock);
 
-                zend_string_free(ce_name);
                 ZVAL_OBJ(value, Z_OBJ(zobj));
             }
             break;
@@ -266,7 +258,7 @@ void pht_convert_entry_to_zval(zval *value, pht_entry_t *e)
                 PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
                 if (!php_var_unserialize(value, &p, p + buf_len, &var_hash)) {
-                    // @todo handle serialisation failure - is this even possible to hit?
+                    zend_throw_exception(zend_ce_exception, "Failed to deserialise the object", 0);
                 }
 
                 PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
